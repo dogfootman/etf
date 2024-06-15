@@ -9,8 +9,8 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      MY_EMAIL: ${{ env.MY_EMAIL }}  # Variable로 설정한 경우
-      MY_NAME: ${{ env.MY_NAME }}    # Variable로 설정한 경우
+      MY_EMAIL: ${{env.MY_EMAIL}}  # Variable로 설정한 경우
+      MY_NAME: ${{env.MY_NAME}}    # Variable로 설정한 경우
       
 
     steps:
