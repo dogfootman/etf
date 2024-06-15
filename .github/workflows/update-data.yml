@@ -1,0 +1,32 @@
+name: Update Google Sheets Data
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # 매 시간마다 실행 (예: 매 시간 정각)
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run data update script
+        run: node update-data.js
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "you@example.com"
+          git config --local user.name "Your Name"
+          git add .
+          git commit -m "Update data"
+          git push
