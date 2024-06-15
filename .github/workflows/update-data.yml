@@ -8,6 +8,11 @@ jobs:
   update-data:
     runs-on: ubuntu-latest
 
+    env:
+      MY_EMAIL: ${{ env.MY_EMAIL }}  # Variable로 설정한 경우
+      MY_NAME: ${{ env.MY_NAME }}    # Variable로 설정한 경우
+      
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -25,8 +30,8 @@ jobs:
 
       - name: Commit and push changes
         run: |
-          git config --local user.email "you@example.com"
-          git config --local user.name "Your Name"
+          git config --local user.email "${MY_EMAIL}"
+          git config --local user.name "${MY_NAME}"
           git add .
           git commit -m "Update data"
           git push
