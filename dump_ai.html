@@ -370,47 +370,31 @@ function renderBodyHTML(text) {
 var translateCache = {};
 var isKorean = false;
 
-// 한국어 토글: 본문(body), 선택지(choices), 해설(explanation)을 모두 한국어로 전환한다.
-// body_kr / choices_kr / explanation_kr 가 사전 번역되어 있으면 사용하고, 없으면 영어 원문을 보여주면서 안내한다.
+// 한국어 토글: 본문(body), 선택지(choices), 해설(explanation)을 모두 한/영 전환한다.
 function toggleTranslate() {
   isKorean = !isKorean;
   applyDisplay(state.current);
 
-  // 한국어 해설 패널은 항상 갱신 (제출 전후 모두 보이게)
-  var panelId = 'kr-explain-panel';
-  var existing = document.getElementById(panelId);
-  if (existing) existing.parentNode.removeChild(existing);
-
-  if (isKorean) {
-    var q = ACTIVE[state.current];
-    var krText = q.explanation_kr || '\ud55c\uad6d\uc5b4 \ud574\uc124\uc774 \uc544\uc9c1 \uc900\ube44\ub418\uc9c0 \uc54a\uc740 \ubb38\uc81c\uc785\ub2c8\ub2e4.';
-    var panel = document.createElement('div');
-    panel.id = panelId;
-    panel.style.cssText = 'margin:16px 0;padding:14px 16px;border:1px solid rgba(63,185,80,0.35);border-left:3px solid #3fb950;border-radius:8px;background:rgba(63,185,80,0.08);color:#e6edf3;line-height:1.7;white-space:pre-wrap;';
-    var head = document.createElement('div');
-    head.textContent = '\ud83c\uddf0\ud83c\uddf7 \ud55c\uad6d\uc5b4 \ud574\uc124';
-    head.style.cssText = 'font-weight:600;color:#3fb950;margin-bottom:8px;font-size:0.92em;';
-    var body = document.createElement('div');
-    body.textContent = krText;
-    panel.appendChild(head);
-    panel.appendChild(body);
-    var qBody = document.getElementById('q-body');
-    if (qBody && qBody.parentNode) {
-      qBody.parentNode.insertBefore(panel, qBody.nextSibling);
-    }
-
-    // 본문/선택지가 사전 번역되어 있지 않은 경우 안내 띠 표시
-    if (!q.body_kr) {
-      var notice = document.createElement('div');
-      notice.id = 'kr-notice-banner';
-      notice.style.cssText = 'margin:8px 0;padding:8px 12px;border-radius:6px;background:rgba(187,128,9,0.15);border:1px solid rgba(187,128,9,0.4);color:#d29922;font-size:0.85em;';
-      notice.textContent = '\u2139\ufe0f \uc774 \ubb38\uc81c\uc758 \ubcf8\ubb38\u00b7\uc120\ud0dd\uc9c0\ub294 \uc544\uc9c1 \ud55c\uad6d\uc5b4\ub85c \ubc88\uc5ed\ub418\uc9c0 \uc54a\uc544 \uc601\ubb38\uc73c\ub85c \ud45c\uc2dc\ub429\ub2c8\ub2e4. (\ud574\uc124\uc740 \ud55c\uae00\ub85c \uc81c\uacf5\ub429\ub2c8\ub2e4)';
-      panel.parentNode.insertBefore(notice, panel);
-    }
+  // result-panel이 이미 열려 있으면 해설 텍스트/레이블만 교체
+  if (document.getElementById('result-panel').classList.contains('show')) {
+    applyExplanation(state.current);
   }
 
   updateTranslateBtn();
 }
+
+// 해설 텍스트와 레이블을 현재 언어에 맞게 갱신
+function applyExplanation(idx) {
+  var q = ACTIVE[idx];
+  if (isKorean) {
+    document.querySelector('.explanation-label').textContent = '해설 (KOR)';
+    document.getElementById('explanation-text').textContent = q.explanation_kr;
+  } else {
+    document.querySelector('.explanation-label').textContent = 'Explanation (ENG)';
+    document.getElementById('explanation-text').textContent = q.explanation || q.explanation_kr;
+  }
+}
+
 
 function applyDisplay(idx) {
   // 한국어 모드면 body_kr/choices_kr 가 있을 때만 사용, 없으면 영어 원문 유지
@@ -610,7 +594,7 @@ function submitAnswer() {
   document.getElementById('result-icon').textContent = isCorrect?'\u2713':'\u2717';
   document.getElementById('result-title').textContent = isCorrect?'\uc815\ub2f5\uc785\ub2c8\ub2e4!':'\uc624\ub2f5\uc785\ub2c8\ub2e4';
   document.getElementById('result-answer').textContent = '\uc815\ub2f5: '+correctArr.join(', ');
-  document.getElementById('explanation-text').textContent = q.explanation_kr;
+  applyExplanation(state.current);
 
   var btn = document.getElementById('submit-btn');
   btn.textContent = state.current<ACTIVE.length-1?'\ub2e4\uc74c \ubb38\uc81c \u2192':'\uacb0\uacfc \ubcf4\uae30';
@@ -633,7 +617,7 @@ function showResult(idx) {
   document.getElementById('result-icon').textContent = res==='correct'?'\u2713':(res==='skipped'?'\u2014':'\u2717');
   document.getElementById('result-title').textContent = res==='correct'?'\uc815\ub2f5!':(res==='skipped'?'\uac74\ub108\ub871':'\uc624\ub2f5');
   document.getElementById('result-answer').textContent = '\uc815\ub2f5: '+Array.from(correctSet).sort().join(', ');
-  document.getElementById('explanation-text').textContent = q.explanation_kr;
+  applyExplanation(state.current);
   var btn = document.getElementById('submit-btn');
   btn.textContent = idx<ACTIVE.length-1?'\ub2e4\uc74c \ubb38\uc81c \u2192':'\uacb0\uacfc \ubcf4\uae30';
   btn.disabled = false;
